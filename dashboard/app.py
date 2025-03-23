@@ -4,11 +4,12 @@ from dash.dependencies import Input, Output
 import base64
 import io
 from PIL import Image
-from scripts.estimativa_tinta import calcular_area_impressao
+from scripts.estimativa_tinta import calcular_area_impressao  # Função para calcular a área de tinta
 
 # Inicializa o aplicativo Dash
 app = dash.Dash(__name__)
 
+# Layout da aplicação
 app.layout = html.Div([
     html.H1("Estimativa de Tinta para Impressão", style={'textAlign': 'center'}),
     
@@ -16,14 +17,14 @@ app.layout = html.Div([
     dcc.Upload(
         id='upload-image',
         children=html.Button('Carregar Imagem'),
-        multiple=False
+        multiple=False  # Permite o upload de apenas uma imagem
     ),
     
-    # Div para exibir os resultados
+    # Div para exibir os resultados após o cálculo
     html.Div(id='output-data-upload'),
 ])
 
-# Callback para processar o upload e mostrar os resultados
+# Função de callback para processar a imagem carregada
 @app.callback(
     Output('output-data-upload', 'children'),
     Input('upload-image', 'contents')
@@ -32,12 +33,12 @@ def update_output(contents):
     if contents is None:
         return "Por favor, carregue uma imagem."
     
-    # Decodificar a imagem enviada (formato base64)
+    # Decodificar a imagem enviada em formato base64
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     img = Image.open(io.BytesIO(decoded))
     
-    # Executar a função de cálculo da área de impressão
+    # Chama a função para calcular a área de tinta
     preta, colorida = calcular_area_impressao(img)
     
     return html.Div([
