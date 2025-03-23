@@ -1,36 +1,22 @@
 from PIL import Image
 import numpy as np
 
-def calcular_area_impressao(imagem_input):
-    """
-    imagem_input pode ser o caminho para o arquivo ou um objeto Image do PIL.
-    """
-    # Se for um caminho (string), abre a imagem; se já for uma imagem, usa-a
-    if isinstance(imagem_input, str):
-        img = Image.open(imagem_input)
-    else:
-        img = imagem_input
-
-    # Converter a imagem para escala de cinza para estimar a tinta preta
+def calcular_area_impressao(img):
+    # Converter a imagem para escala de cinza
     img_gray = img.convert('L')
+    
+    # Converter a imagem para uma matriz de pixels
     img_array = np.array(img_gray)
     
-    # Pixels com valor menor que 128 são considerados tinta preta
-    tinta_preta = (img_array < 128).sum()
+    # Calcular a quantidade de pixels claros e escuros (para simplificação)
+    # Aqui, 200 é um valor de threshold para diferenciar a cor preta da colorida
+    total_pixels = img_array.size
+    pixels_preto = np.sum(img_array < 128)  # Considerando que o valor 128 representa uma cor escura
     
-    # Para tinta colorida, contamos os pixels que não são totalmente brancos
-    img_array_color = np.array(img)
-    tinta_colorida = (np.any(img_array_color[:, :, :3] < 128, axis=-1)).sum()
+    # A área preta seria o número de pixels escuros sobre o total de pixels
+    preta_percentual = (pixels_preto / total_pixels) * 100
     
-    # Total de pixels
-    area_total = img_array.size
-    tinta_preta_percentual = tinta_preta / area_total * 100
-    tinta_colorida_percentual = tinta_colorida / area_total * 100
-
-    return tinta_preta_percentual, tinta_colorida_percentual
-
-if __name__ == "__main__":
-    caminho_imagem = "assets/imagem_teste.png"  # Certifique-se de enviar uma imagem para a pasta assets
-    preta, colorida = calcular_area_impressao(caminho_imagem)
-    print(f"Tinta preta estimada: {preta:.2f}%")
-    print(f"Tinta colorida estimada: {colorida:.2f}%")
+    # Para fins ilustrativos, vamos supor que o resto seja tinta colorida
+    colorida_percentual = 100 - preta_percentual
+    
+    return preta_percentual, colorida_percentual
